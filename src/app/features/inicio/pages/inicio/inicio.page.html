@@ -1,0 +1,187 @@
+<ion-content>
+  <section class="dashboard-shell">
+    <div class="hero-panel">
+      <div class="hero-copy">
+        <span class="eyebrow">Panel de control</span>
+        <h1>Bienvenido, {{ usuario?.nombre || 'Clinica Versalles' }}</h1>
+        <p></p>
+      </div>
+
+      <div class="date-pill">
+        <ion-icon name="calendar"></ion-icon>
+        <div>
+          <strong>{{ fechaActual | titlecase }}</strong>
+          <span>{{ horaActual }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <ion-grid class="stats-grid">
+      <ion-row>
+        <ion-col size="12" size-md="6" size-xl="3">
+          <ion-card class="stat-card blue">
+            <ion-card-content>
+              <div class="stat-icon"><ion-icon name="people"></ion-icon></div>
+              <div>
+                <h2>{{ pacientes.length }}</h2>
+                <p>Pacientes registrados</p>
+                <small>{{ pacientesActivos }} activos</small>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="6" size-xl="3">
+          <ion-card class="stat-card green">
+            <ion-card-content>
+              <div class="stat-icon"><ion-icon name="calendar"></ion-icon></div>
+              <div>
+                <h2>{{ citasHoy }}</h2>
+                <p>Citas hoy</p>
+                <small>{{ citasConfirmadas }} confirmadas</small>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="6" size-xl="3">
+          <ion-card class="stat-card purple">
+            <ion-card-content>
+              <div class="stat-icon"><ion-icon name="medical"></ion-icon></div>
+              <div>
+                <h2>{{ medicosActivos }}</h2>
+                <p>Medicos activos</p>
+                <small>{{ citasPendientes }} citas pendientes</small>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="6" size-xl="3">
+          <ion-card class="stat-card orange">
+            <ion-card-content>
+              <div class="stat-icon"><ion-icon name="cash"></ion-icon></div>
+              <div>
+                <h2>S/ {{ ingresos | number:'1.2-2' }}</h2>
+                <p>Ingresos pagados</p>
+                <small>Pagos registrados</small>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div class="content-grid">
+      <ion-card class="panel appointments-panel">
+        <ion-card-header>
+          <div>
+            <ion-card-title>Citas recientes</ion-card-title>
+            <p>Control rapido de atenciones programadas.</p>
+          </div>
+          <ion-button size="small" routerLink="/dashboard/citas">
+            Ver citas
+            <ion-icon name="arrow-forward" slot="end"></ion-icon>
+          </ion-button>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="table-header">
+            <span>Hora</span>
+            <span>Paciente</span>
+            <span>Medico</span>
+            <span>Estado</span>
+          </div>
+
+          <div class="table-row" *ngFor="let cita of ultimasCitas; trackBy: trackById">
+            <strong>{{ cita.hora }}</strong>
+            <div>
+              <b>{{ cita.pacienteNombre }}</b>
+              <small>{{ cita.especialidad }}</small>
+            </div>
+            <span>{{ cita.medicoNombre }}</span>
+            <em [class]="'estado ' + estadoClase(cita.estado)">{{ cita.estado }}</em>
+          </div>
+
+          <p class="empty" *ngIf="ultimasCitas.length === 0">Aun no hay citas registradas.</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="panel specialty-panel">
+        <ion-card-header>
+          <div>
+            <ion-card-title>Consultas por especialidad</ion-card-title>
+            <p>Distribucion segun citas registradas.</p>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="specialty-item" *ngFor="let item of especialidadesResumen">
+            <div class="specialty-line">
+              <span>{{ item.nombre }}</span>
+              <strong>{{ item.porcentaje }}%</strong>
+            </div>
+            <div class="progress"><span [style.width.%]="item.porcentaje"></span></div>
+          </div>
+
+          <p class="empty" *ngIf="especialidadesResumen.length === 0">Sin datos suficientes todavia.</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="panel patients-panel">
+        <ion-card-header>
+          <div>
+            <ion-card-title>Ultimos pacientes registrados</ion-card-title>
+            <p>Vista rapida desde la tabla pacientes.</p>
+          </div>
+          <ion-button size="small" fill="outline" routerLink="/dashboard/pacientes">
+            Ver todos
+          </ion-button>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="patient-row" *ngFor="let paciente of ultimosPacientes; trackBy: trackById">
+            <div class="patient-avatar">{{ iniciales(paciente.nombres, paciente.apellidos) }}</div>
+            <div>
+              <strong>{{ paciente.nombres }} {{ paciente.apellidos }}</strong>
+              <span>{{ paciente.documento || 'Sin documento' }}</span>
+            </div>
+            <em [class]="'estado ' + estadoClase(paciente.estado)">{{ paciente.estado }}</em>
+          </div>
+
+          <p class="empty" *ngIf="ultimosPacientes.length === 0">Aun no hay pacientes registrados.</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <ion-card class="quick-actions">
+      <ion-card-header>
+        <ion-card-title>Acciones rapidas</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button routerLink="/dashboard/pacientes" fill="outline">
+          <ion-icon name="people" slot="start"></ion-icon>
+          Nuevo paciente
+        </ion-button>
+        <ion-button routerLink="/dashboard/citas">
+          <ion-icon name="calendar" slot="start"></ion-icon>
+          Nueva cita
+        </ion-button>
+        <ion-button routerLink="/dashboard/medicos" fill="outline">
+          <ion-icon name="medical" slot="start"></ion-icon>
+          Medicos
+        </ion-button>
+        <ion-button routerLink="/dashboard/pagos" fill="outline">
+          <ion-icon name="cash" slot="start"></ion-icon>
+          Registrar pago
+        </ion-button>
+        <ion-button routerLink="/dashboard/reportes" fill="outline">
+          <ion-icon name="document-text" slot="start"></ion-icon>
+          Reporte
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </section>
+</ion-content>

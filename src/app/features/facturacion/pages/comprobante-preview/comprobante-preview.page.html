@@ -1,0 +1,138 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Comprobante</h1>
+        <p>Vista clinica del documento asociado al pago.</p>
+      </div>
+      <ion-badge [color]="esOficial ? 'success' : 'warning'">
+        {{ esOficial ? 'Oficial' : 'Borrador' }}
+      </ion-badge>
+    </div>
+
+    <div class="alert success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <div class="loading" *ngIf="isCargando">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Cargando comprobante...</span>
+    </div>
+
+    <ng-container *ngIf="!isCargando && comprobante as item">
+      <div class="actions">
+        <ion-button fill="outline" (click)="cargar()">
+          <ion-icon name="refresh" slot="start"></ion-icon>
+          Actualizar
+        </ion-button>
+        <ion-button *ngIf="puedeEmitir" [disabled]="procesando" (click)="emitir()">
+          <ion-icon name="send" slot="start"></ion-icon>
+          {{ item.estado === 'PENDIENTE_EMISION' ? 'Emitir' : 'Reintentar emision' }}
+        </ion-button>
+        <ion-button fill="outline" *ngIf="puedeGestionar" [disabled]="procesando" (click)="consultar()">
+          <ion-icon name="refresh" slot="start"></ion-icon>
+          Consultar estado
+        </ion-button>
+        <ion-button fill="outline" [disabled]="!item.pdfUrl" (click)="abrirPdf()">
+          <ion-icon name="open" slot="start"></ion-icon>
+          Abrir PDF
+        </ion-button>
+        <ion-button fill="outline" [disabled]="!item.pdfUrl" (click)="imprimir()">
+          <ion-icon name="print" slot="start"></ion-icon>
+          Imprimir
+        </ion-button>
+      </div>
+
+      <div class="preview-grid">
+        <ion-card>
+          <ion-card-content>
+            <section class="receipt" [class.official]="esOficial">
+              <div class="invalid-label" *ngIf="!esOficial">Vista previa sin validez tributaria</div>
+
+              <div class="receipt-head">
+                <div>
+                  <h2>{{ item.previewData.clinica?.nombre || 'Clinica Versalles' }}</h2>
+                  <p *ngIf="item.previewData.clinica?.ruc">RUC {{ item.previewData.clinica?.ruc }}</p>
+                </div>
+                <div class="document-box">
+                  <strong>{{ item.tipoComprobante }}</strong>
+                  <span>{{ item.serie }}-{{ item.numero }}</span>
+                </div>
+              </div>
+
+              <div class="info-grid">
+                <div>
+                  <span>Fecha de emision</span>
+                  <strong>{{ item.fechaPago || item.previewData.fecha_emision || item.createdAt | date:'mediumDate' }}</strong>
+                </div>
+                <div>
+                  <span>Estado</span>
+                  <strong>{{ estadoLabel(item.estado) }}</strong>
+                </div>
+                <div>
+                  <span>{{ item.clienteTipoDocumento }}</span>
+                  <strong>{{ item.clienteNumeroDocumento }}</strong>
+                </div>
+                <div>
+                  <span>Cliente</span>
+                  <strong>{{ item.clienteDenominacion }}</strong>
+                </div>
+              </div>
+
+              <p class="address" *ngIf="item.clienteDireccion">{{ item.clienteDireccion }}</p>
+
+              <div class="clinical-box">
+                <h3>{{ item.concepto }}</h3>
+                <p>Cita: {{ item.citaFecha || item.previewData.cita?.fecha || 'Sin fecha' }} {{ item.citaHora || item.previewData.cita?.hora || '' }}</p>
+                <p *ngIf="item.medicoNombre || item.especialidad">
+                  {{ item.medicoNombre || item.previewData.cita?.medico || 'Medico no registrado' }}
+                  <span *ngIf="item.especialidad">- {{ item.especialidad }}</span>
+                </p>
+                <p>Metodo de pago: {{ item.metodoPago || item.previewData.pago?.metodo_pago || 'No registrado' }}</p>
+              </div>
+
+              <div class="totals">
+                <div><span>Subtotal</span><strong>S/ {{ (item.previewData.pago?.subtotal || (item.monto / 1.18)) | number:'1.2-2' }}</strong></div>
+                <div><span>IGV 18%</span><strong>S/ {{ (item.previewData.pago?.igv || (item.monto - (item.monto / 1.18))) | number:'1.2-2' }}</strong></div>
+                <div class="grand"><span>Total</span><strong>S/ {{ item.monto | number:'1.2-2' }}</strong></div>
+              </div>
+
+              <div class="official-data" *ngIf="esOficial">
+                <img *ngIf="qrDataUrl" [src]="qrDataUrl" alt="QR oficial SUNAT">
+                <div>
+                  <p><strong>Hash:</strong> {{ item.codigoHash || 'Pendiente' }}</p>
+                  <p><strong>Estado SUNAT:</strong> {{ item.estadoSunat || item.sunatDescription || 'Pendiente' }}</p>
+                  <p *ngIf="item.sunatResponseCode"><strong>Codigo:</strong> {{ item.sunatResponseCode }}</p>
+                </div>
+              </div>
+
+              <div class="error-box" *ngIf="item.errorMensaje || item.sunatSoapError">
+                {{ item.errorMensaje || item.sunatSoapError }}
+              </div>
+            </section>
+          </ion-card-content>
+        </ion-card>
+
+        <div class="side-panel">
+          <ion-card *ngIf="pdfSafeUrl">
+            <ion-card-content>
+              <h3>PDF oficial</h3>
+              <iframe [src]="pdfSafeUrl" title="PDF oficial"></iframe>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card>
+            <ion-card-content>
+              <h3>Auditoria</h3>
+              <div class="event" *ngFor="let evento of eventos">
+                <strong>{{ evento.operacion }} - {{ evento.estado }}</strong>
+                <span>{{ evento.createdAt | date:'short' }}</span>
+                <p *ngIf="evento.mensaje">{{ evento.mensaje }}</p>
+              </div>
+              <p class="empty" *ngIf="eventos.length === 0">Sin eventos registrados.</p>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</ion-content>

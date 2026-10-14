@@ -1,0 +1,128 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Pagos</h1>
+        <p>Registra pagos de citas y permite consulta segura por paciente.</p>
+      </div>
+      <ion-badge color="primary"></ion-badge>
+    </div>
+
+    <div class="alert success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <ng-container *ngIf="(citas$ | async) as citas">
+      <ion-card>
+        <ion-card-content>
+          <h3>{{ idEdicion ? 'Editar pago' : 'Nuevo pago' }}</h3>
+
+          <form [formGroup]="pagoForm" (ngSubmit)="guardarPago()">
+            <ion-item>
+              <ion-select label="Cita" labelPlacement="stacked" placeholder="Selecciona cita" formControlName="citaId" (ionChange)="seleccionarCita(citas)">
+                <ion-select-option *ngFor="let cita of citas" [value]="cita.id">
+                  {{ cita.fecha }} - {{ cita.hora }} - {{ cita.pacienteNombre }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Concepto" labelPlacement="stacked" formControlName="concepto"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Monto S/" labelPlacement="stacked" type="number" formControlName="monto"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-select label="Metodo" labelPlacement="stacked" formControlName="metodoPago">
+                <ion-select-option value="Efectivo">Efectivo</ion-select-option>
+                <ion-select-option value="Tarjeta">Tarjeta</ion-select-option>
+                <ion-select-option value="Yape">Yape</ion-select-option>
+                <ion-select-option value="Plin">Plin</ion-select-option>
+                <ion-select-option value="Transferencia">Transferencia</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-select label="Estado" labelPlacement="stacked" formControlName="estado">
+                <ion-select-option value="pendiente">Pendiente</ion-select-option>
+                <ion-select-option value="pagado">Pagado</ion-select-option>
+                <ion-select-option value="anulado">Anulado</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Fecha de pago" labelPlacement="stacked" type="date" formControlName="fechaPago"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-checkbox labelPlacement="end" formControlName="generarComprobante">Generar comprobante</ion-checkbox>
+            </ion-item>
+
+            <ng-container *ngIf="pagoForm.controls.generarComprobante.value">
+              <ion-item>
+                <ion-select label="Tipo de comprobante" labelPlacement="stacked" formControlName="tipoComprobante">
+                  <ion-select-option value="BOLETA">Boleta</ion-select-option>
+                  <ion-select-option value="FACTURA">Factura</ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <ion-item *ngIf="muestraDatosFactura">
+                <ion-input label="RUC" labelPlacement="stacked" maxlength="11" formControlName="clienteNumeroDocumento"></ion-input>
+              </ion-item>
+
+              <ion-item *ngIf="muestraDatosFactura">
+                <ion-input label="Razon social" labelPlacement="stacked" formControlName="clienteDenominacion"></ion-input>
+              </ion-item>
+
+              <ion-item *ngIf="muestraDatosFactura">
+                <ion-input label="Direccion fiscal" labelPlacement="stacked" formControlName="clienteDireccion"></ion-input>
+              </ion-item>
+            </ng-container>
+
+            <div class="actions">
+              <ion-button fill="outline" type="button" (click)="limpiarFormulario()">Limpiar</ion-button>
+              <ion-button type="submit" [disabled]="isGuardando || !puedeGestionar">
+                {{ idEdicion ? 'Actualizar' : 'Registrar' }} pago
+              </ion-button>
+            </div>
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+
+    <ion-card class="list-card">
+      <ion-card-content>
+        <h3>Pagos registrados</h3>
+
+        <ion-list *ngIf="pagos$ | async as pagos">
+          <div *ngFor="let pago of pagos" class="payment-record">
+            <div class="record-summary">
+              <h2>{{ pago.pacienteNombre }}</h2>
+              <p>{{ pago.concepto }} - S/ {{ pago.monto }}</p>
+              <p>{{ pago.metodoPago }} - {{ pago.fechaPago || 'Sin fecha' }}</p>
+              <ion-badge>{{ estadoLabel(pago.estado) }}</ion-badge>
+              <ng-container *ngIf="pago.comprobante">
+                <p>{{ pago.comprobante.tipoComprobante }} {{ pago.comprobante.serie }}-{{ pago.comprobante.numero }}</p>
+                <ion-badge color="secondary">{{ comprobanteEstadoLabel(pago) }}</ion-badge>
+              </ng-container>
+              <div class="payment-actions">
+              <ion-button size="small" fill="outline" *ngIf="pago.comprobante" (click)="previsualizar(pago)">Previsualizar</ion-button>
+              <ion-button size="small" *ngIf="puedeEmitir(pago)" [disabled]="procesandoComprobanteId === pago.comprobante!.id" (click)="emitir(pago)">
+                {{ pago.comprobante!.estado === 'PENDIENTE_EMISION' ? 'Emitir' : 'Reintentar emision' }}
+              </ion-button>
+              <ion-button size="small" fill="outline" *ngIf="pago.comprobante && puedeGestionar" [disabled]="procesandoComprobanteId === pago.comprobante.id" (click)="consultarEstado(pago)">Consultar estado</ion-button>
+              <ion-button size="small" fill="outline" *ngIf="pago.comprobante" [disabled]="!pago.comprobante.pdfUrl" (click)="abrirPdf(pago)">Ver PDF</ion-button>
+              <ion-button size="small" fill="outline" *ngIf="pago.comprobante" [disabled]="!pago.comprobante.pdfUrl" (click)="imprimir(pago)">Imprimir</ion-button>
+              <ion-button size="small" color="warning" *ngIf="puedeGestionar" (click)="prepararEdicion(pago)">Editar</ion-button>
+              <ion-button size="small" color="danger" *ngIf="puedeAnular" (click)="eliminarPago(pago.id)">Anular</ion-button>
+              </div>
+            </div>
+          </div>
+
+          <p class="empty" *ngIf="pagos.length === 0">No hay pagos registrados.</p>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

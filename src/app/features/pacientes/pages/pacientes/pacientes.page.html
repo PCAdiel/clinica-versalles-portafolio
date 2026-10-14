@@ -1,0 +1,127 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Pacientes</h1>
+        <p>Registra, busca y administra pacientes </p>
+      </div>
+      <ion-badge color="primary"></ion-badge>
+    </div>
+
+    <div class="alert success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <div class="grid-2">
+      <ion-card>
+        <ion-card-content>
+          <h3>{{ idEdicion ? 'Editar paciente' : 'Nuevo paciente' }}</h3>
+
+          <form [formGroup]="pacienteForm" (ngSubmit)="guardarPaciente()">
+            <ion-item>
+              <ion-input label="Nombres" labelPlacement="stacked" formControlName="nombres"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Apellidos" labelPlacement="stacked" formControlName="apellidos"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="DNI" labelPlacement="stacked" formControlName="documento"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Telefono" labelPlacement="stacked" formControlName="telefono"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Correo" labelPlacement="stacked" type="email" formControlName="email"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Fecha de nacimiento" labelPlacement="stacked" type="date" formControlName="fechaNacimiento"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Direccion" labelPlacement="stacked" formControlName="direccion"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Grupo sanguineo" labelPlacement="stacked" placeholder="Ej. O+" formControlName="grupoSanguineo"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-textarea label="Alergias" labelPlacement="stacked" formControlName="alergias"></ion-textarea>
+            </ion-item>
+
+            <ion-item>
+              <ion-textarea label="Antecedentes" labelPlacement="stacked" formControlName="antecedentes"></ion-textarea>
+            </ion-item>
+
+            <ion-item>
+              <ion-select label="Estado" labelPlacement="stacked" formControlName="estado">
+                <ion-select-option value="Activo">Activo</ion-select-option>
+                <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <div class="actions">
+              <ion-button fill="outline" type="button" (click)="limpiarFormulario()">Limpiar</ion-button>
+              <ion-button type="submit" [disabled]="isGuardando || !puedeGestionar">
+                {{ idEdicion ? 'Actualizar' : 'Registrar' }} paciente
+              </ion-button>
+            </div>
+          </form>
+        </ion-card-content>
+      </ion-card>
+
+      <div>
+        <ion-card>
+          <ion-card-content>
+            <h3>Buscar paciente</h3>
+            <form [formGroup]="filtroForm">
+              <ion-item>
+                <ion-input placeholder="Nombre, DNI, telefono o correo" formControlName="busqueda"></ion-input>
+              </ion-item>
+            </form>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card *ngIf="pacienteSeleccionado">
+          <ion-card-content>
+            <h3>Informacion del paciente</h3>
+            <h2>{{ pacienteSeleccionado.nombres }} {{ pacienteSeleccionado.apellidos }}</h2>
+            <p><strong>Documento:</strong> {{ pacienteSeleccionado.documento }}</p>
+            <p><strong>Telefono:</strong> {{ pacienteSeleccionado.telefono }}</p>
+            <p><strong>Correo:</strong> {{ pacienteSeleccionado.email || 'Sin correo' }}</p>
+            <p><strong>Grupo sanguineo:</strong> {{ pacienteSeleccionado.grupoSanguineo || 'No registrado' }}</p>
+            <p><strong>Alergias:</strong> {{ pacienteSeleccionado.alergias || 'Ninguna registrada' }}</p>
+            <ion-badge>{{ pacienteSeleccionado.estado }}</ion-badge>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+    <ion-card class="list-card">
+      <ion-card-content>
+        <h3>Pacientes registrados</h3>
+
+        <ion-list *ngIf="pacientes$ | async as pacientes">
+          <ion-item *ngFor="let paciente of filtrarPacientes(pacientes)" class="list-item" button (click)="seleccionarPaciente(paciente)">
+            <ion-label class="record-summary">
+              <h2>{{ paciente.nombres }} {{ paciente.apellidos }}</h2>
+              <p>DNI: {{ paciente.documento }} - Tel: {{ paciente.telefono }}</p>
+              <p>{{ paciente.email || 'Sin correo registrado' }}</p>
+              <ion-badge>{{ paciente.estado }}</ion-badge>
+              <div class="record-actions" *ngIf="puedeGestionar">
+                <ion-button color="warning" (click)="$event.stopPropagation(); prepararEdicion(paciente)">Editar</ion-button>
+                <ion-button color="danger" (click)="$event.stopPropagation(); eliminarPaciente(paciente.id)">Desactivar</ion-button>
+              </div>
+            </ion-label>
+          </ion-item>
+
+          <p class="empty" *ngIf="filtrarPacientes(pacientes).length === 0">No hay pacientes registrados.</p>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

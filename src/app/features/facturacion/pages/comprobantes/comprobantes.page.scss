@@ -1,0 +1,107 @@
+ion-content { --background: #f4f7fb; }
+
+.page-container { padding: 24px; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+h1 {
+  color: #0b2c5f;
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 6px;
+}
+
+.page-header p { color: #64748b; margin: 0; }
+h2 { color: #102a56; font-weight: 800; }
+
+ion-card {
+  border-radius: 22px;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, .08);
+  border: 1px solid rgba(148, 163, 184, .18);
+}
+
+ion-item {
+  --background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.toolbar-row ion-item {
+  flex: 1;
+  max-width: 320px;
+}
+
+.item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.invoice-record {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.invoice-record h2 { margin: 0 0 6px; font-size: 18px; }
+.invoice-record p { margin: 4px 0; overflow-wrap: anywhere; }
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  padding: 18px;
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  font-weight: 700;
+}
+
+.success { background: #dcfce7; color: #166534; }
+.danger { background: #fee2e2; color: #991b1b; }
+.empty { text-align: center; color: #64748b; padding: 14px; }
+
+@media (max-width: 900px) {
+  .page-header,
+  .toolbar-row {
+    flex-direction: column;
+  }
+
+  .toolbar-row ion-item {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-container { padding: 16px; }
+  h1 { font-size: 26px; }
+  ion-card { border-radius: 18px; }
+  .invoice-record { padding: 14px; }
+  .item-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .item-actions ion-button { width: 100%; margin: 0; font-size: 12px; }
+}

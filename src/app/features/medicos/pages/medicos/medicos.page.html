@@ -1,0 +1,92 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Medicos</h1>
+        <p>Consulta disponibilidad y administra perfiles medicos.</p>
+      </div>
+      <ion-badge color="primary"></ion-badge>
+    </div>
+
+    <div class="alert success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <div class="grid-2">
+      <ion-card>
+        <ion-card-content>
+          <h3>{{ idEdicion ? 'Editar medico' : 'Nuevo medico' }}</h3>
+
+          <form [formGroup]="medicoForm" (ngSubmit)="guardarMedico()">
+            <ion-item>
+              <ion-input label="Nombres" labelPlacement="stacked" formControlName="nombres"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Apellidos" labelPlacement="stacked" formControlName="apellidos"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-select label="Especialidad" labelPlacement="stacked" formControlName="especialidad">
+                <ion-select-option *ngFor="let item of especialidades" [value]="item">{{ item }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Telefono" labelPlacement="stacked" formControlName="telefono"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Correo" labelPlacement="stacked" type="email" formControlName="email"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Colegiatura" labelPlacement="stacked" formControlName="colegiatura"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Horario" labelPlacement="stacked" placeholder="Ej. Lun-Vie 08:00-14:00" formControlName="horario"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-select label="Estado" labelPlacement="stacked" formControlName="estado">
+                <ion-select-option value="Activo">Activo</ion-select-option>
+                <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <div class="actions">
+              <ion-button fill="outline" type="button" (click)="limpiarFormulario()">Limpiar</ion-button>
+              <ion-button type="submit" [disabled]="isGuardando || !puedeGestionar">
+                {{ idEdicion ? 'Actualizar' : 'Registrar' }} medico
+              </ion-button>
+            </div>
+          </form>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="list-card">
+        <ion-card-content>
+          <h3>Medicos registrados</h3>
+
+          <ion-list *ngIf="medicos$ | async as medicos">
+            <ion-item *ngFor="let medico of medicos" class="list-item">
+              <ion-label class="record-summary">
+                <h2>Dr(a). {{ medico.nombres }} {{ medico.apellidos }}</h2>
+                <p>{{ medico.especialidad }} - Tel: {{ medico.telefono }}</p>
+                <p>{{ medico.email || 'Sin correo registrado' }}</p>
+                <p>{{ medico.horario || 'Horario no registrado' }}</p>
+                <ion-badge>{{ medico.estado }}</ion-badge>
+                <div class="record-actions" *ngIf="puedeGestionar">
+                  <ion-button color="warning" (click)="prepararEdicion(medico)">Editar</ion-button>
+                  <ion-button color="danger" (click)="eliminarMedico(medico.id)">Desactivar</ion-button>
+                </div>
+              </ion-label>
+            </ion-item>
+
+            <p class="empty" *ngIf="medicos.length === 0">No hay medicos registrados.</p>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

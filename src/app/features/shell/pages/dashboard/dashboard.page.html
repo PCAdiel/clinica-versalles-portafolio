@@ -1,0 +1,80 @@
+<ion-split-pane contentId="main-content" when="md">
+  <ion-menu contentId="main-content" class="clinic-menu">
+    <ion-content class="menu-content">
+      <div class="brand-box">
+        <div class="brand-mark">CV</div>
+        <div>
+          <h2>CLINICA<br />VERSALLES</h2>
+          <p>Sistema de Gestion</p>
+        </div>
+      </div>
+
+      <ion-list class="nav-list">
+        <ng-container *ngFor="let item of menuItems">
+          <ion-item *ngIf="puedeVer(item)" button [routerLink]="item.route" routerLinkActive="active" lines="none">
+            <ion-icon [name]="item.icon" slot="start"></ion-icon>
+            <span>{{ item.label }}</span>
+          </ion-item>
+        </ng-container>
+      </ion-list>
+
+      <div class="menu-footer">
+        <ion-item button (click)="cerrarSesion()" class="logout-item" lines="none">
+          <ion-icon name="log-out" slot="start"></ion-icon>
+          <span>Cerrar sesion</span>
+        </ion-item>
+        <small>Version 1.0.1 - Clinica Versalles</small>
+      </div>
+    </ion-content>
+  </ion-menu>
+
+  <div class="ion-page" id="main-content">
+    <ion-header class="app-header">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+
+        <ion-title>Dashboard Clinico</ion-title>
+
+        <div slot="end" class="user-box">
+          <button type="button" class="notification-button" (click)="alternarNotificaciones()">
+            <span class="notification-dot" *ngIf="totalNoLeidas > 0">{{ totalNoLeidas }}</span>
+            <ion-icon name="document-text"></ion-icon>
+          </button>
+          <div class="avatar">{{ usuario?.nombre?.charAt(0) || 'C' }}</div>
+          <div class="user-copy">
+            <strong>{{ usuario?.nombre || 'Clinica Versalles' }}</strong>
+            <span>{{ rolLabel() }}</span>
+          </div>
+
+          <div class="notifications-panel" *ngIf="muestraNotificaciones">
+            <div class="notifications-head">
+              <strong>Notificaciones</strong>
+              <button type="button" (click)="marcarTodas()">Leer todas</button>
+            </div>
+
+            <button
+              type="button"
+              class="notification-row"
+              *ngFor="let notificacion of notificaciones"
+              [class.unread]="!notificacion.leida"
+              (click)="marcarNotificacion(notificacion.id)"
+            >
+              <strong>{{ notificacion.titulo }}</strong>
+              <span>{{ notificacion.mensaje }}</span>
+            </button>
+
+            <p class="notifications-empty" *ngIf="notificaciones.length === 0">No hay notificaciones.</p>
+          </div>
+        </div>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="main-content-area">
+      <ion-router-outlet></ion-router-outlet>
+    </ion-content>
+
+    <app-chat-ia *ngIf="puedeUsarChat()"></app-chat-ia>
+  </div>
+</ion-split-pane>

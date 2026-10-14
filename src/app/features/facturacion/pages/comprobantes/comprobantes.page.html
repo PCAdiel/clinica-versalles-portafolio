@@ -1,0 +1,79 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Facturacion</h1>
+        <p>Gestiona comprobantes clinicos asociados a pagos de citas.</p>
+      </div>
+      <ion-badge color="primary"></ion-badge>
+    </div>
+
+    <div class="alert success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <ion-card>
+      <ion-card-content>
+        <div class="toolbar-row">
+          <ion-item>
+            <ion-select label="Filtro" labelPlacement="stacked" [(ngModel)]="filtro" (ionChange)="cargar()">
+              <ion-select-option value="todos">Todos</ion-select-option>
+              <ion-select-option value="pendientes">Pendientes</ion-select-option>
+              <ion-select-option value="emitidos">Emitidos</ion-select-option>
+              <ion-select-option value="error">Con error</ion-select-option>
+              <ion-select-option value="anulados">Anulados</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-button fill="outline" (click)="cargar()">
+            <ion-icon name="refresh" slot="start"></ion-icon>
+            Actualizar
+          </ion-button>
+        </div>
+
+        <div class="loading" *ngIf="isCargando">
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Cargando comprobantes...</span>
+        </div>
+
+        <ion-list *ngIf="!isCargando">
+          <div *ngFor="let comprobante of comprobantes" class="invoice-record">
+            <div class="invoice-summary">
+              <h2>{{ comprobante.tipoComprobante }} {{ comprobante.serie }}-{{ comprobante.numero }}</h2>
+              <p>{{ comprobante.pacienteNombre }} - {{ comprobante.concepto }}</p>
+              <p>S/ {{ comprobante.monto | number:'1.2-2' }} - {{ comprobante.fechaPago || 'Sin fecha' }}</p>
+              <ion-badge>{{ estadoLabel(comprobante.estado) }}</ion-badge>
+              <ion-badge color="success" *ngIf="comprobante.estadoSunat">{{ comprobante.estadoSunat }}</ion-badge>
+            <div class="item-actions">
+              <ion-button size="small" fill="outline" (click)="verPreview(comprobante)">
+                <ion-icon name="eye" slot="start"></ion-icon>
+                Previsualizar
+              </ion-button>
+              <ion-button size="small" *ngIf="puedeEmitir(comprobante)" [disabled]="procesandoId === comprobante.id" (click)="emitir(comprobante)">
+                <ion-icon name="send" slot="start"></ion-icon>
+                {{ comprobante.estado === 'PENDIENTE_EMISION' ? 'Emitir' : 'Reintentar' }}
+              </ion-button>
+              <ion-button size="small" fill="outline" *ngIf="puedeGestionar" [disabled]="procesandoId === comprobante.id" (click)="consultar(comprobante)">
+                <ion-icon name="refresh" slot="start"></ion-icon>
+                Consultar
+              </ion-button>
+              <ion-button size="small" fill="outline" [disabled]="!comprobante.pdfUrl" (click)="abrirPdf(comprobante)">
+                Ver PDF
+              </ion-button>
+              <ion-button size="small" fill="outline" [disabled]="!comprobante.pdfUrl" (click)="imprimir(comprobante)">
+                <ion-icon name="print" slot="start"></ion-icon>
+                Imprimir
+              </ion-button>
+              <ion-button size="small" color="danger" fill="outline" *ngIf="puedeGestionar && comprobante.estado === 'EMITIDO'" [disabled]="procesandoId === comprobante.id" (click)="anular(comprobante)">
+                <ion-icon name="trash" slot="start"></ion-icon>
+                Anular
+              </ion-button>
+            </div>
+            </div>
+          </div>
+
+          <p class="empty" *ngIf="comprobantes.length === 0">No hay comprobantes para este filtro.</p>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

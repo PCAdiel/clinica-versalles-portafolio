@@ -1,0 +1,42 @@
+<button
+  type="button"
+  class="chat-cloud-button"
+  *ngIf="!isChatAbierto"
+  (click)="alternarChat()"
+  aria-label="Abrir Chat IA"
+>
+  <ion-icon name="chatbox-ellipses"></ion-icon>
+</button>
+
+<section class="chat-cloud-panel" *ngIf="isChatAbierto">
+  <div class="chat-cloud-head">
+    <div>
+      <strong>Chat IA</strong>
+      <span>Contexto protegido por rol</span>
+    </div>
+    <button type="button" (click)="alternarChat()" aria-label="Cerrar Chat IA">
+      <ion-icon name="close"></ion-icon>
+    </button>
+  </div>
+
+  <div class="chat-cloud-error" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+  <div class="chat-cloud-messages">
+    <div class="chat-cloud-message" *ngFor="let mensaje of mensajes" [class.user]="mensaje.autor === 'usuario'">
+      <strong>{{ mensaje.autor === 'usuario' ? 'Tu' : 'Asistente IA' }}</strong>
+      <p>{{ mensaje.texto }}</p>
+    </div>
+
+    <div class="chat-cloud-message loading" *ngIf="isEnviando">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Analizando contexto permitido...</p>
+    </div>
+  </div>
+
+  <form [formGroup]="chatForm" (ngSubmit)="enviar()" class="chat-cloud-form">
+    <ion-item class="chat-cloud-input" lines="none">
+      <ion-input placeholder="Ej. Que citas pendientes tengo hoy?" formControlName="mensaje"></ion-input>
+    </ion-item>
+    <ion-button type="submit" [disabled]="isEnviando">Enviar</ion-button>
+  </form>
+</section>

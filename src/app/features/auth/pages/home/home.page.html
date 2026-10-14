@@ -1,0 +1,38 @@
+<ion-content [fullscreen]="true">
+  <div class="login-container">
+    <ion-card>
+      <div class="logo-container">
+        <img src="https://cdn-icons-png.flaticon.com/512/2966/2966486.png" alt="logo">
+      </div>
+
+      <h1>CLINICA</h1>
+      <h2>VERSALLES</h2>
+      <p class="subtitulo">Sistema de Gestion Clinica</p>
+      <hr>
+
+      <ion-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="login()">
+          <label>USUARIO</label>
+          <ion-item lines="none">
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-input formControlName="email" placeholder="Ingrese su correo" type="email"></ion-input>
+          </ion-item>
+
+          <label>CONTRASENA</label>
+          <ion-item lines="none">
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-input formControlName="password" placeholder="Ingrese su contrasena" [type]="mostrarPassword ? 'text' : 'password'"></ion-input>
+            <ion-icon name="eye-outline" slot="end" (click)="alternarPassword()"></ion-icon>
+          </ion-item>
+
+          <p class="error" *ngIf="mensajeError">{{ mensajeError }}</p>
+
+          <ion-button expand="block" shape="round" type="submit" [disabled]="isLoading">
+            <ion-icon name="log-in-outline" slot="start"></ion-icon>
+            {{ isLoading ? 'Validando...' : 'Iniciar sesion' }}
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

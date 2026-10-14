@@ -1,0 +1,7 @@
+{
+  "name": "clinicaversalles-demo",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

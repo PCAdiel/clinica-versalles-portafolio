@@ -1,0 +1,170 @@
+:host {
+  display: contents;
+}
+
+.chat-cloud-button {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 40;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50% 50% 50% 18px;
+  background: linear-gradient(135deg, #1d75ff, #0b4bb3);
+  color: #fff;
+  box-shadow: 0 18px 36px rgba(29, 117, 255, .34);
+  cursor: pointer;
+}
+
+.chat-cloud-button ion-icon {
+  font-size: 30px;
+}
+
+.chat-cloud-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 40;
+  width: min(430px, calc(100vw - 32px));
+  max-height: min(640px, calc(100vh - 110px));
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  border: 1px solid #dbe4f0;
+  border-radius: 22px 22px 8px 22px;
+  background: #fff;
+  box-shadow: 0 24px 56px rgba(15, 23, 42, .22);
+  padding: 16px;
+}
+
+.chat-cloud-panel::after {
+  content: '';
+  position: absolute;
+  right: 22px;
+  bottom: -11px;
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  border-right: 1px solid #dbe4f0;
+  border-bottom: 1px solid #dbe4f0;
+  transform: rotate(45deg);
+}
+
+.chat-cloud-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.chat-cloud-head div {
+  display: grid;
+  gap: 3px;
+}
+
+.chat-cloud-head strong {
+  color: #0b2c5f;
+}
+
+.chat-cloud-head span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.chat-cloud-head button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #0b2c5f;
+  cursor: pointer;
+}
+
+.chat-cloud-error {
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px 12px;
+  font-weight: 800;
+}
+
+.chat-cloud-messages {
+  min-height: 260px;
+  max-height: 430px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+  padding: 2px 2px 10px;
+}
+
+.chat-cloud-message {
+  max-width: 88%;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px 14px 14px 6px;
+  background: #f8fafc;
+  padding: 10px 12px;
+}
+
+.chat-cloud-message strong {
+  color: #0b2c5f;
+}
+
+.chat-cloud-message p {
+  color: #334155;
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+}
+
+.chat-cloud-message.user {
+  justify-self: end;
+  border-color: #bfdbfe;
+  border-radius: 14px 14px 6px 14px;
+  background: #eff6ff;
+}
+
+.chat-cloud-message.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-cloud-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+ion-item.chat-cloud-input {
+  --background: #f8fafc;
+  --color: #0f172a;
+  --border-radius: 10px;
+  --padding-start: 12px;
+  --inner-padding-end: 8px;
+  min-height: 48px;
+  margin: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .chat-cloud-panel {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 92px);
+  }
+  .chat-cloud-messages {
+    max-height: 56vh;
+  }
+}

@@ -1,0 +1,88 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Historial Clinico</h1>
+        <p>Registra diagnostico, tratamiento y observaciones asociadas a citas atendidas.</p>
+      </div>
+      <ion-badge color="primary"></ion-badge>
+    </div>
+
+    <div class="alert success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <ng-container *ngIf="(pacientes$ | async) as pacientes">
+      <ng-container *ngIf="(citas$ | async) as citas">
+        <ion-card>
+          <ion-card-content>
+            <h3>{{ idEdicion ? 'Editar historial' : 'Nuevo historial' }}</h3>
+
+            <form [formGroup]="historialForm" (ngSubmit)="guardarHistorial()">
+              <ion-item>
+                <ion-select label="Cita relacionada" labelPlacement="stacked" placeholder="Selecciona cita" formControlName="citaId" (ionChange)="seleccionarCita(citas)">
+                  <ion-select-option *ngFor="let cita of citas" [value]="cita.id">
+                    {{ cita.fecha }} - {{ cita.hora }} - {{ cita.pacienteNombre }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <ion-item>
+                <ion-select label="Paciente" labelPlacement="stacked" placeholder="Selecciona paciente" formControlName="pacienteId" (ionChange)="seleccionarPaciente(pacientes)">
+                  <ion-select-option *ngFor="let paciente of pacientes" [value]="paciente.id">
+                    {{ paciente.nombres }} {{ paciente.apellidos }} - {{ paciente.documento }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <ion-item>
+                <ion-textarea label="Diagnostico" labelPlacement="stacked" formControlName="diagnostico"></ion-textarea>
+              </ion-item>
+
+              <ion-item>
+                <ion-textarea label="Tratamiento" labelPlacement="stacked" formControlName="tratamiento"></ion-textarea>
+              </ion-item>
+
+              <ion-item>
+                <ion-textarea label="Observaciones" labelPlacement="stacked" formControlName="observaciones"></ion-textarea>
+              </ion-item>
+
+              <ion-item>
+                <ion-input label="Fecha" labelPlacement="stacked" type="date" formControlName="fecha"></ion-input>
+              </ion-item>
+
+              <div class="actions">
+                <ion-button fill="outline" type="button" (click)="limpiarFormulario()">Limpiar</ion-button>
+                <ion-button type="submit" [disabled]="isGuardando || !puedeGestionar">
+                  {{ idEdicion ? 'Actualizar' : 'Registrar' }} historial
+                </ion-button>
+              </div>
+            </form>
+          </ion-card-content>
+        </ion-card>
+      </ng-container>
+    </ng-container>
+
+    <ion-card class="list-card">
+      <ion-card-content>
+        <h3>Historiales registrados</h3>
+
+        <ion-list *ngIf="historial$ | async as historiales">
+          <ion-item *ngFor="let historial of historiales">
+            <ion-label>
+              <h2>{{ historial.pacienteNombre }}</h2>
+              <p>{{ historial.medicoNombre }} - {{ historial.fecha }}</p>
+              <p><strong>Diagnostico:</strong> {{ historial.diagnostico }}</p>
+              <p><strong>Tratamiento:</strong> {{ historial.tratamiento }}</p>
+              <p>{{ historial.observaciones || 'Sin observaciones' }}</p>
+            </ion-label>
+
+            <ion-button slot="end" color="warning" *ngIf="puedeGestionar" (click)="prepararEdicion(historial)">Editar</ion-button>
+            <ion-button slot="end" color="danger" *ngIf="puedeGestionar" (click)="eliminarHistorial(historial.id)">Eliminar</ion-button>
+          </ion-item>
+
+          <p class="empty" *ngIf="historiales.length === 0">No hay historiales registrados.</p>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

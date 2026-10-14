@@ -1,0 +1,135 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Gestion de Citas</h1>
+        <p>Agenda citas seleccionando pacientes y medicos disponibles</p>
+      </div>
+      <ion-badge color="primary"></ion-badge>
+    </div>
+
+    <div class="alert success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <ng-container *ngIf="(pacientes$ | async) as pacientes">
+      <ng-container *ngIf="(medicos$ | async) as medicos">
+        <form [formGroup]="citaForm" (ngSubmit)="guardarCita()">
+          <div class="grid">
+            <ion-card>
+              <ion-card-content>
+                <h3>1. Paciente</h3>
+
+                <ion-item>
+                  <ion-select label="Paciente" labelPlacement="stacked" placeholder="Selecciona paciente" formControlName="pacienteId" (ionChange)="seleccionarPaciente(pacientes)" [disabled]="esPaciente">
+                    <ion-select-option *ngFor="let paciente of pacientes" [value]="paciente.id">
+                      {{ paciente.nombres }} {{ paciente.apellidos }} - {{ paciente.documento }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+
+                <ion-item>
+                  <ion-textarea label="Motivo" labelPlacement="stacked" placeholder="Motivo de consulta" formControlName="motivo"></ion-textarea>
+                </ion-item>
+
+                <ion-item>
+                  <ion-select label="Tipo de consulta" labelPlacement="stacked" formControlName="tipoConsulta">
+                    <ion-select-option value="Consulta General">Consulta General</ion-select-option>
+                    <ion-select-option value="Emergencia">Emergencia</ion-select-option>
+                    <ion-select-option value="Control">Control</ion-select-option>
+                    <ion-select-option value="Seguimiento">Seguimiento</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card>
+              <ion-card-content>
+                <h3>2. Medico y especialidad</h3>
+
+                <ion-item>
+                  <ion-select label="Medico" labelPlacement="stacked" placeholder="Selecciona medico" formControlName="medicoId" (ionChange)="seleccionarMedico(medicos)">
+                    <ion-select-option *ngFor="let medico of medicos" [value]="medico.id">
+                      Dr(a). {{ medico.nombres }} {{ medico.apellidos }} - {{ medico.especialidad }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+
+                <ion-item>
+                  <ion-input label="Especialidad" labelPlacement="stacked" [value]="especialidad" readonly="true"></ion-input>
+                </ion-item>
+
+                <ion-item *ngIf="puedeConfirmarCancelar">
+                  <ion-select label="Estado" labelPlacement="stacked" formControlName="estado">
+                    <ion-select-option value="pendiente">Pendiente</ion-select-option>
+                    <ion-select-option value="confirmada">Confirmada</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card>
+              <ion-card-content>
+                <h3>3. Fecha y hora</h3>
+
+                <ion-item>
+                  <ion-input label="Fecha" labelPlacement="stacked" type="date" formControlName="fecha"></ion-input>
+                </ion-item>
+
+                <div class="horarios">
+                  <ion-button *ngFor="let item of horarios" size="small" type="button" [fill]="citaForm.controls.hora.value === item ? 'solid' : 'outline'" (click)="seleccionarHora(item)">
+                    {{ item }}
+                  </ion-button>
+                </div>
+
+                <p class="selected-hour" *ngIf="citaForm.controls.hora.value">Hora seleccionada: <strong>{{ citaForm.controls.hora.value }}</strong></p>
+              </ion-card-content>
+            </ion-card>
+          </div>
+
+          <ion-card>
+            <ion-card-content>
+              <h3>4. Confirmacion</h3>
+
+              <ion-item>
+                <ion-textarea label="Mensaje adicional" labelPlacement="stacked" placeholder="Observacion o indicacion adicional" formControlName="mensaje"></ion-textarea>
+              </ion-item>
+
+              <div class="actions">
+                <ion-button fill="outline" type="button" (click)="limpiarFormulario()">Limpiar</ion-button>
+                <ion-button type="submit" [disabled]="isGuardando || !puedeGestionar">
+                  <ion-spinner *ngIf="isGuardando" name="crescent"></ion-spinner>
+                  <span *ngIf="!isGuardando">{{ idEdicion ? 'Actualizar cita' : 'Guardar cita' }}</span>
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </form>
+      </ng-container>
+    </ng-container>
+
+    <ion-card class="list-card">
+      <ion-card-content>
+        <h3>Citas registradas</h3>
+
+        <ion-list *ngIf="citas$ | async as citas">
+          <ion-item *ngFor="let cita of citas">
+            <ion-label>
+              <h2>{{ cita.pacienteNombre }}</h2>
+              <p>{{ cita.medicoNombre }} - {{ cita.especialidad }}</p>
+              <p>{{ cita.fecha }} - {{ cita.hora }} - {{ cita.tipoConsulta }}</p>
+              <p>{{ cita.motivo || 'Sin motivo registrado' }}</p>
+              <ion-badge>{{ estadoLabel(cita.estado) }}</ion-badge>
+            </ion-label>
+
+            <ion-button slot="end" color="warning" *ngIf="puedeEditarCitas && cita.estado !== 'atendida'" (click)="prepararEdicion(cita)">Editar</ion-button>
+            <ion-button slot="end" color="primary" *ngIf="puedeConfirmarCancelar && cita.estado === 'pendiente'" (click)="confirmarCita(cita.id)">Confirmar</ion-button>
+            <ion-button slot="end" color="success" *ngIf="puedeAtender && cita.estado === 'confirmada'" (click)="marcarAtendida(cita.id)">Atendida</ion-button>
+            <ion-button slot="end" color="danger" *ngIf="puedeCancelarCitas && cita.estado !== 'atendida' && cita.estado !== 'cancelada'" (click)="cancelarCita(cita.id)">Cancelar</ion-button>
+          </ion-item>
+
+          <p class="empty" *ngIf="citas.length === 0">No hay citas registradas.</p>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

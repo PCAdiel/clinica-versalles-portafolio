@@ -1,0 +1,97 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Configuracion</h1>
+        <p>Administra perfiles, roles y estado de usuarios del sistema.</p>
+      </div>
+      <ion-badge color="primary"></ion-badge>
+    </div>
+
+    <div class="alert success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <ion-card>
+      <ion-card-content>
+        <h3>{{ idEdicion ? 'Editar cuenta de acceso' : 'Nueva cuenta de acceso' }}</h3>
+
+        <form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
+          <ion-item>
+            <ion-input label="UID Supabase Auth" labelPlacement="stacked" formControlName="uid" [readonly]="!!idEdicion"></ion-input>
+          </ion-item>
+
+          <ion-item *ngIf="!idEdicion">
+            <ion-input label="Contrasena inicial" labelPlacement="stacked" type="password" formControlName="password"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input label="Nombre" labelPlacement="stacked" formControlName="nombre"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input label="Correo" labelPlacement="stacked" type="email" formControlName="email"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-input label="Telefono" labelPlacement="stacked" formControlName="telefono"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-select label="Rol" labelPlacement="stacked" formControlName="rol">
+              <ion-select-option *ngFor="let item of roles" [value]="item">{{ rolLabel(item) }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-select label="Estado" labelPlacement="stacked" formControlName="estado">
+              <ion-select-option value="Activo">Activo</ion-select-option>
+              <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item *ngIf="usuarioForm.controls.rol.value === 'paciente' && !idEdicion">
+            <ion-select label="Vincular paciente existente" labelPlacement="stacked" placeholder="Selecciona una ficha clinica" formControlName="pacienteId">
+              <ion-select-option *ngFor="let paciente of (pacientes$ | async)" [value]="paciente.id">
+                {{ paciente.nombres }} {{ paciente.apellidos }} - DNI {{ paciente.documento }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item *ngIf="usuarioForm.controls.rol.value === 'medico' && !idEdicion">
+            <ion-input label="Especialidad del medico" labelPlacement="stacked" formControlName="especialidad"></ion-input>
+          </ion-item>
+
+          <div class="actions">
+            <ion-button fill="outline" type="button" (click)="limpiarFormulario()">Limpiar</ion-button>
+            <ion-button type="submit" [disabled]="isGuardando">
+              {{ idEdicion ? 'Actualizar' : 'Registrar' }} perfil
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="list-card">
+      <ion-card-content>
+        <h3>Usuarios registrados</h3>
+
+        <ion-list *ngIf="usuarios$ | async as usuarios">
+          <ion-item *ngFor="let usuario of usuarios" class="list-item">
+            <ion-label class="record-summary">
+              <h2>{{ usuario.nombre }}</h2>
+              <p>{{ usuario.email }} - {{ usuario.telefono || 'Sin telefono' }}</p>
+              <ion-badge>{{ rolLabel(usuario.rol) }}</ion-badge>
+              <ion-badge>{{ usuario.estado }}</ion-badge>
+              <div class="record-actions">
+                <ion-button color="warning" (click)="prepararEdicion(usuario)">Editar</ion-button>
+                <ion-button color="danger" (click)="eliminarUsuario(usuario.id)">Desactivar</ion-button>
+              </div>
+            </ion-label>
+          </ion-item>
+
+          <p class="empty" *ngIf="usuarios.length === 0">No hay usuarios registrados.</p>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

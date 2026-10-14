@@ -1,0 +1,54 @@
+<ion-content>
+  <div class="page-container">
+    <div class="page-header">
+      <div>
+        <h1>Reportes</h1>
+        <p>Indicadores calculados desde tablas relacionales </p>
+      </div>
+      <ion-badge color="danger"></ion-badge>
+    </div>
+
+    <div class="alert danger" *ngIf="mensajeError">{{ mensajeError }}</div>
+
+    <div class="stats-grid">
+      <ion-card>
+        <ion-card-content>
+          <span>Pacientes</span>
+          <h2>{{ pacientes.length }}</h2>
+          <p>Total registrados</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-content>
+          <span>Medicos</span>
+          <h2>{{ medicos.length }}</h2>
+          <p>Total activos e inactivos</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-content>
+          <span>Citas</span>
+          <h2>{{ citas.length }}</h2>
+          <p>{{ citasPendientes }} pendientes - {{ citasConfirmadas }} confirmadas</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-content>
+          <span>Ingresos</span>
+          <h2>S/ {{ ingresosTotales }}</h2>
+          <p>Pagos con estado pagado</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <ion-card>
+      <ion-card-content>
+        <h3>Lectura critica</h3>
+        <p>Este modulo toma informacion de pacientes, medicos, citas y pagos protegida por RLS. Sirve para revisar organizacion, demanda e ingresos sin exponer datos de otros pacientes.</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
