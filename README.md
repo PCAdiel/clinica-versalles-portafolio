@@ -10,9 +10,7 @@ El proyecto responde a una problematica de gestion manual: registros en cuaderno
 
 La carpeta `demo/` contiene un prototipo interactivo autónomo con citas y pacientes ficticios. Permite recorrer la agenda, registrar una cita de muestra y actualizar su estado. No se conecta a Supabase ni almacena información clínica.
 
-**Demo interactiva:** https://clinica-versalles-demo.vercel.app/
-
-La demostración estática vive en `demo/` y tiene su configuración de Vercel. La aplicación completa de Ionic/Angular se mantiene en la raíz del repositorio y necesita configurar un proyecto Supabase propio.
+Para publicar esta demostración en Vercel, importa el repositorio y selecciona `demo` como **Root Directory**. La aplicación completa de Ionic/Angular se mantiene en la raíz del repositorio y necesita configurar un proyecto Supabase propio.
 
 ## Funcionalidades principales
 
